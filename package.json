@@ -23,7 +23,7 @@
     "standard": "*"
   },
   "dependencies": {
-    "pg-async-transaction": "^2.0.1"
+    "pg-async-transaction": "^2.1.0"
   },
   "peerDependencies": {
     "pg": "*"

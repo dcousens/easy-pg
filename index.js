@@ -36,9 +36,9 @@ function easypg (connectUrl, debug) {
       if (err) return done(err)
       if (debug) client._debug = debug
 
-      pat(client, (callback) => fn(client, callback), (err) => {
+      pat(client, (callback) => fn(client, callback), (err, result) => {
         free()
-        done(err)
+        done(err, result)
       })
     })
   }
