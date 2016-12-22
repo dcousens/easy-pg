@@ -14,6 +14,12 @@ function easypg (connectUrl, debug) {
       if (typeof callback !== 'function') throw new TypeError('Expected Function')
       if (debug) debug(name, JSON.stringify(values).slice(0, 80 - name.length) + '...')
 
+      // convert Buffers to postgres strings
+      values = values.map((x) => {
+        if (Buffer.isBuffer(x)) return `\\x${x.toString('hex')}`
+        return x
+      })
+
       // use an existing client?
       if (client) return runQuery(client, values, callback)
 
