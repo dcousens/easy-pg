@@ -1,8 +1,21 @@
 let pat = require('pg-async-transaction')
 let pg = require('pg')
+let series = require('run-series')
 
 function easypg (connectUrl, debug) {
   function makeQuery (name, text) {
+    if (text.indexOf(';') !== -1) {
+      let queries = text.split(';').map((x, i) => makeQuery(`${name}-${i}`, x))
+
+      return function multiQuery (client, values, callback) {
+        if (!Array.isArray(values)) throw new TypeError('Expected Array')
+        if (values.length !== 0) throw new TypeError('No parameterized values allowed in multi-query')
+
+        let tasks = queries.map((query) => (f) => query(client, [], f))
+        return series(tasks, callback)
+      }
+    }
+
     function runQuery (client, values, callback) {
       client.query({ name, text, values }, (err, result) => {
         callback(err, err ? undefined : result.rows)
