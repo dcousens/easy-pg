@@ -5,7 +5,15 @@ let series = require('run-series')
 function easypg (connectUrl, debug) {
   function makeQuery (name, text) {
     if (text.indexOf(';') !== -1) {
-      let queries = text.split(';').map((x, i) => makeQuery(`${name}-${i}`, x))
+      let queries = []
+
+      // split queries up by ;
+      text.split(';').forEach((expression, i) => {
+        expression = expression.trim()
+        if (expression.length === 0) return
+
+        queries.push(makeQuery(`${name}-${i}`, expression))
+      })
 
       return function multiQuery (client, values, callback) {
         if (!Array.isArray(values)) throw new TypeError('Expected Array')
