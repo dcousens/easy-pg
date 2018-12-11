@@ -1,6 +1,6 @@
 const pat = require('pg-async-transaction')
 
-function easypg (pg, connectUrl, debug) {
+function easypg ({ connect }) {
   function makeQuery (name, text) {
     if (text.indexOf(';') !== -1) throw new TypeError('Unexpected ;')
 
@@ -10,12 +10,11 @@ function easypg (pg, connectUrl, debug) {
       })
     }
 
-    return function query (client, values, callback) {
+    return function query (values, callback, client) {
       if (!Array.isArray(values)) throw new TypeError('Expected Array')
       if (typeof callback !== 'function') throw new TypeError('Expected Function')
-      if (debug) debug(name, JSON.stringify(values).slice(0, 80 - name.length) + '...')
 
-      // convert Buffers to postgres strings
+      // convert Buffers to POSTGRES hex strings
       values = values.map((x) => {
         if (Buffer.isBuffer(x)) return `\\x${x.toString('hex')}`
         return x
@@ -25,7 +24,7 @@ function easypg (pg, connectUrl, debug) {
       if (client) return runQuery(client, values, callback)
 
       // otherwise, make a new client
-      pg.connect(connectUrl, (err, clientNew, free) => {
+      connect((err, clientNew, free) => {
         if (err) return callback(err)
 
         runQuery(clientNew, values, (err, result) => {
@@ -39,9 +38,8 @@ function easypg (pg, connectUrl, debug) {
   }
 
   function transaction (fn, done) {
-    pg.connect(connectUrl, (err, client, free) => {
+    connect((err, client, free) => {
       if (err) return done(err)
-      if (debug) client._debug = debug
 
       pat(client, (callback) => fn(client, callback), (err, result) => {
         free()
