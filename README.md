@@ -1,5 +1,7 @@
 # easy-pg
-A biased pg wrapper
+A biased pg wrapper.
+
+**WARNING**: There are no tests (yet),  use at your own risk.
 
 
 ## Examples
