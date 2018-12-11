@@ -42,4 +42,4 @@ pg.transaction((client, callback) => {
 ```
 
 
-## License [ISC](LICENSE)
+## License [MIT](LICENSE)
